@@ -12,7 +12,7 @@ const app = express();
 // 2. Configure CORS to allow requests from your Vite frontend
 const allowedOrigins = [
   'http://localhost:5173',
-  'eco-learn-95de3umwo-rithik-v-kumars-projects.vercel.app' // Add your live Vercel URL
+  'https://eco-learn-iota.vercel.app' // Add your live Vercel URL
 ];
 app.use(
   cors({
