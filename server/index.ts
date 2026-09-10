@@ -10,12 +10,23 @@ import authRoutes from './routes/authRoutes.js';
 const app = express();
 
 // 2. Configure CORS to allow requests from your Vite frontend
+const allowedOrigins = [
+  'http://localhost:5173',
+  'eco-learn-95de3umwo-rithik-v-kumars-projects.vercel.app' // Add your live Vercel URL
+];
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
+
 
 // 3. Body parser middleware
 app.use(express.json());
