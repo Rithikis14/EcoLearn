@@ -1,74 +1,64 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '../types';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api/auth';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, fullName: string, userType: 'individual' | 'school', institutionDetails?: { name: string; type: string }) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  googleAuth: (credential: string) => Promise<void>;
   logout: () => void;
-  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if user is logged in from localStorage
+  const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
-  }, []);
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
 
-  const login = async (email: string, password: string) => {
-    // Simulate API call
-    const mockUser: User = {
-      id: '1',
-      email,
-      full_name: 'John Doe',
-      user_type: 'individual',
-      points: 150,
-      created_at: new Date().toISOString(),
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
+  const handleAuthSuccess = (userData: User, authToken: string) => {
+    setUser(userData);
+    setToken(authToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', authToken);
   };
 
-  const register = async (
-    email: string, 
-    password: string, 
-    fullName: string, 
-    userType: 'individual' | 'school',
-    institutionDetails?: { name: string; type: string }
-  ) => {
-    // Simulate API call
-    const mockUser: User = {
-      id: '1',
-      email,
-      full_name: fullName,
-      user_type: userType,
-      institution_name: institutionDetails?.name,
-      institution_type: institutionDetails?.type,
-      points: 0,
-      created_at: new Date().toISOString(),
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
+  const login = async (email: string, password: string) => {
+    const res = await axios.post(`${API_URL}/login`, { email, password });
+    handleAuthSuccess(res.data.user, res.data.token);
+  };
+
+  const register = async (name: string, email: string, password: string) => {
+    const res = await axios.post(`${API_URL}/register`, { name, email, password });
+    handleAuthSuccess(res.data.user, res.data.token);
+  };
+
+  const googleAuth = async (credential: string) => {
+    const res = await axios.post(`${API_URL}/google`, { credential });
+    handleAuthSuccess(res.data.user, res.data.token);
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, googleAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -76,8 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }

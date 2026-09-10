@@ -22,7 +22,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.5",
     "@supabase/supabase-js": "^2.57.4",
+    "axios": "^1.20.0",
     "framer-motion": "^12.23.13",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",

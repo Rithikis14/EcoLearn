@@ -13,6 +13,9 @@ import SnakeLadder from './components/SnakeLadder';
 import CarbonGame from './components/CarbonGame';
 import {Leaderboard } from './pages/LeaderboardPage';
 import { RedeemPage } from './pages/RedeemPage';
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
+
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
