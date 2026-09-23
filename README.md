@@ -1,6 +1,6 @@
 # EcoLearn - Your Personalized Gamified Educational Learning Platform
 
-## Table of contents
+## Table of contents:
 
 * [About](#about)
 * [Features](#features)
